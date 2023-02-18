@@ -3,8 +3,8 @@ from model_keras import *
 import gym
 import math
 from humancritic_tensorflow import *
-from gym.wrappers.monitoring import video_recorder as VideoRecorder
-import matplotlib.plt as pyplot
+from gym.wrappers.monitoring import VideoRecorder
+import matplotlib.pyplot as plt
 
 import argparse
 

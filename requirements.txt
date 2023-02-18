@@ -1,6 +1,7 @@
 gym
 keras
 numpy
+matplotlib
 opencv_python
 tensorflow
 box2D
