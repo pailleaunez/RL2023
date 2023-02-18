@@ -3,7 +3,9 @@ from model_keras import *
 import gym
 import math
 from humancritic_tensorflow import *
-from gym.monitoring import VideoRecorder
+from gym.wrappers.monitoring import video_recorder as VideoRecorder
+import matplotlib.plt as pyplot
+
 import argparse
 
 # Args
@@ -62,8 +64,8 @@ def render(env,recorde=False):
 				break
 	if rec != None:
 		rec.close()
-	print "[ RunLength =",5," MeanReward =",mean_reward / 5.0, "MeantrajReward =",mean_traj_reward/5.0,\
-			" MeanRunTime =",mean_run_time / 5.0, " MaxRunTime =",max_run_time," MinRunTime =",min_run_time,"]"
+	print("[ RunLength =",5," MeanReward =",mean_reward / 5.0, "MeantrajReward =",mean_traj_reward/5.0,\
+			" MeanRunTime =",mean_run_time / 5.0, " MaxRunTime =",max_run_time," MinRunTime =",min_run_time,"]")
 
 
 
@@ -106,7 +108,7 @@ hc_loss_mean_c = 1
 hc_trijectory_interval = 2
 hc_tricectory_c = 0
 trijectory = None
-trijectory_seed = np.random.randint(2**32)
+trijectory_seed = np.random.randint(2**16)
 trijectory_env_name = env_name
 
 save_freq = 10
@@ -122,11 +124,16 @@ idx = 1
 
 # TEST MODE
 if args.test == True:
-	print "[ TEST_MODE ]"
+	print("[ TEST_MODE ]")
 	while True:
 		render(env)
+# Plots
+ep_list = []
+reward_list = []
+loss_list = []
 
 while True:
+
 	frame = 0
 	done=False
 	trij_total_reward = 0
@@ -140,8 +147,10 @@ while True:
 
 	# Status update
 	if run_id % run_time == 0:
-		print "[ Episode:",run_id," Mean-Reward:",mean_reward/float(run_time), " MeanHCLoss:",hc_loss_mean/hc_loss_mean_c," Epsilon:",eps,"]"
+		print("[ Episode:",run_id," Mean-Reward:",mean_reward/float(run_time), " MeanHCLoss:",hc_loss_mean/hc_loss_mean_c," Epsilon:",eps,"]")
 		mean_reward = 0.0
+
+
 
 	# Ask_X
 	if run_id > 0 and run_id % hc_ask_human_freq_episodes == 0:
@@ -152,7 +161,7 @@ while True:
 
 	# Trijectory
 	if run_id % hc_trijectory_interval == 0 and run_id % render_freq != 0:
-		trijectory_seed = np.random.randint(2**32)
+		trijectory_seed = np.random.randint(2**16)
 		trijectory_env_name = env_name
 		trijectory = []
 		trij_obs_list = []
@@ -161,15 +170,37 @@ while True:
 
 	# Render
 	if run_id % render_freq == 0:
-		print "[RENDERING]"
+		print("[RENDERING]")
 		render(env)
 		run_id += 1
+
+		# Update of the variables for the plots
+		ep_list.append(run_id)
+		loss_list.append(hc_loss_mean / hc_loss_mean_c)
+		reward_list.append(mean_reward / float(run_time))
+
+		# Plots
+		## - Reward
+		plt.figure(1)
+		plt.plot(ep_list, reward_list)
+		plt.title('Mean reward')
+		plt.ylabel('reward')
+		plt.xlabel('episodes')
+		plt.savefig('rewards.png')
+
+		## - Loss
+		plt.figure(2)
+		plt.plot(ep_list, loss_list)
+		plt.title('Mean hetero center loss')
+		plt.ylabel('HCloss')
+		plt.xlabel('episodes')
+		plt.savefig('hcloss.png')
 
 	# Save
 	if run_id % save_freq == 0:
 		hc_model.save()
 		rl_model.save()
-		print "Saved"
+		print("Saved")
 
 	# HC_Train
 	if run_id % hc_train_freq == 0:
