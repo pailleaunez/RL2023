@@ -1,0 +1,9 @@
+gym
+keras
+numpy
+opencv_python
+tensorflow
+box2D
+pyglet==1.5.27
+tf_slim
+gym[box2d]
