@@ -1,7 +1,5 @@
-import numpy as np
-
-from keras.models import Sequential
-from keras.layers import Dense
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
 import tensorflow as tf
 from datetime import datetime
 import os
@@ -13,33 +11,31 @@ class RLModel(object):
 		self.layer_sizes = layer_sizes
 		self.lr = 0.00025
 		self.lr_decay = 0.000
-
 		self.create_model()
-
 		self.datetime_str = datetime_str
 		self.checkpoint_path = "./human_critic/rl_model/"+self.datetime_str+"/rl_keras_"+self.datetime_str+".h5"
 
 
 	# Helper Functions
 	def lrelu(self,x, leak=0.2, name="lrelu"):
-		with tf.variable_scope(name):
+		with tf.compat.v1.variable_scope(name):
 			f1 = 0.5 * (1+ leak)
 			f2 = 0.5 * (1-leak)
 			return f1*x+f2*abs(x)
 
 	def linear(self,x,name="linear"):
-		with tf.variable_scope(name):
+		with tf.compat.v1.variable_scope(name):
 			return x
 
 	def create_network(self):
 		model = Sequential()
 		for i in range(len(self.layer_sizes)):
 			if i == 0:
-				model.add(Dense(self.layer_sizes[i],input_dim=self.obs_size,init="uniform",activation="relu"))
+				model.add(Dense(self.layer_sizes[i],input_dim=self.obs_size,kernel_initializer="uniform",activation="relu"))
 			elif i +1 == len(self.layer_sizes):
-				model.add(Dense(self.action_size,init="uniform",activation="linear"))
+				model.add(Dense(self.action_size, kernel_initializer="uniform",activation="linear"))
 			else:
-				model.add(Dense(self.layer_sizes[i],init="uniform",activation="relu"))
+				model.add(Dense(self.layer_sizes[i],kernel_initializer="uniform",activation="relu"))
 
 		model.compile(loss="mean_squared_error",optimizer="adam")
 
@@ -64,7 +60,7 @@ class RLModel(object):
 
 	def train(self,batch,sess):
 		with self.graph.as_default():
-			self.model.fit(batch[0],batch[1],nb_epoch=1,batch_size=len(batch[0]),verbose=0)
+			self.model.fit(batch[0],batch[1],epochs=1,batch_size=len(batch[0]),verbose=0)
 
 	def save(self):		
 		if not os.path.isdir(os.path.dirname(self.checkpoint_path)):
