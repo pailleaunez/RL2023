@@ -1,5 +1,7 @@
 # LearningFromHumanPreferences
 
+forked from: https://github.com/ZachisGit/LearningFromHumanPreferences
+
 This is an implementation of the OpenAI - Learning from human preferences paper: 
 https://arxiv.org/pdf/1706.03741.pdf<br/>
 Learning from human preferences is a method allowing reward based learning systems like reinforcement learning to master a task - in this case in the OpenAI gym - solely based on the preferred episode out of two possibilities chosen by a human observer. The observer only has to "prefer" a small subset of episodes being trained on.
